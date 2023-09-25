@@ -8,28 +8,20 @@ import { TicketStatus } from "@prisma/client";
 
 
  async function getTicketsTservice(){
-    try {
-        const tickets = await ticketsRepository.findTickets();
-        console.log("tickes service",tickets)
-        return tickets;
-      } catch (error) {
-        console.error(`Erro ao obter ingressos: ${error.message}`);
-        throw error; 
-      }
-    }
+
+    const tickets = await ticketsRepository.findTickets();
+    return tickets;
+  
+}
 
 
 async function postTicketSerive(ticketTypeId: number,userId: number) {
 
   // try{
     const enrollment = await enrollmentsService.getOneWithAddressByUserId(userId)
+    if (!enrollment) { throw notFoundError() }
 
-    if (!enrollment) {
-      return {
-        status: 404,
-        message: 'Usuário não possui inscrição no evento.',
-      };
-    }
+
     console.log("enrollment", enrollment)
 
     const createTicket : newTicket = {
@@ -40,8 +32,6 @@ async function postTicketSerive(ticketTypeId: number,userId: number) {
 
      const ticketType = await ticketsRepository.ticketTypeId(ticketTypeId);
    
-
-
     const create = await ticketsRepository.createTicket(createTicket)
 
     const response = {
@@ -73,18 +63,36 @@ async function postTicketSerive(ticketTypeId: number,userId: number) {
 }
 
 async function servicesTickets(userId: number){
-  const enrollment = await enrollmentsService.getOneWithAddressByUserId(userId)
-  if (!enrollment) {
-    return {
-      status: 404,
-      message: 'Usuário não possui inscrição no evento.',
-    };
-  }
 
+  const enrollment = await enrollmentsService.getOneWithAddressByUserId(userId)
+  if (!enrollment) { throw notFoundError() }
+
+  
   const tickesReturn = await ticketsRepository.ticketsRepo(enrollment.id)
+  if (!tickesReturn) { throw notFoundError() }
+
+  const ticketType = await ticketsRepository.ticketTypeId(tickesReturn.ticketTypeId);
+
+  const response = {
+    id: tickesReturn.id, 
+    status: tickesReturn.status,
+    ticketTypeId: tickesReturn.ticketTypeId,
+    enrollmentId: tickesReturn.enrollmentId,
+    TicketType: {
+      createdAt: ticketType.createdAt,
+      id: ticketType.id,
+      includesHotel: ticketType.includesHotel,
+      name: ticketType.name,
+      price: ticketType.price,
+      isRemote: ticketType.isRemote,
+      updatedAt: ticketType.updatedAt,
+    },
+    createdAt: tickesReturn.createdAt, 
+    updatedAt: tickesReturn.updatedAt, 
+  };
 console.log("tikectReturn",tickesReturn)
 
-  return tickesReturn
+  return response
 
 
 }

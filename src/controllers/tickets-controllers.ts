@@ -1,22 +1,19 @@
+import { notFoundError } from '@/errors';
 import { AuthenticatedRequest } from '@/middlewares';
-import { ticketsTypesService } from '@/services';
+import { enrollmentsService, ticketsTypesService } from '@/services';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 
 
 
 export async function getTicketsTypes(req: AuthenticatedRequest, res: Response){
-    const { userId } = req;
-
+  
     try {
-        const tickets = await ticketsTypesService.getTicketsTservice();
-        console.log("tickets con",tickets)
-        
-        res.status(httpStatus.OK).json({ tickets });
+        const tickets = await ticketsTypesService.getTicketsTservice()
+        return res.send(tickets)   
+
     } catch (error) {
-        console.error(`Erro ao obter ingressos: ${error.message}`);
-        
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Erro ao obter ingressos.' });
+        return res.sendStatus(httpStatus.NO_CONTENT)
     }
 }
 
@@ -33,12 +30,11 @@ export async function postTickets(req:AuthenticatedRequest, res: Response) {
 
     try{
         const ticketsPost = await ticketsTypesService.postTicketSerive(ticketTypeId,userId)
-        res.status(httpStatus.OK).json({ ticketsPost });
+        return res.status(httpStatus.CREATED).send(ticketsPost); // Configura o status HTTP para 201
 
     } catch(error){
-        console.error(`Erro ao obter ingressos: ${error.message}`);
-        
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Erro ao obter ingressos.' });
+        return res.sendStatus(httpStatus.NOT_FOUND)
+
     }
 }
 
@@ -49,15 +45,15 @@ export async function getTickets(req: AuthenticatedRequest, res: Response){
     try{
         const getControlletresTicket = await ticketsTypesService.servicesTickets(userId);
         console.log("getControlletresTicket",getControlletresTicket)
+        
 
 
-        res.status(httpStatus.OK).json({ getControlletresTicket });
+        return res.send(getControlletresTicket)   
 
 
     } catch(error){
-        console.error(`Erro ao obter ingressos: ${error.message}`);
-        
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Erro ao obter ingressos.' });
+        return res.sendStatus(httpStatus.NOT_FOUND)
+
     }
 
 }    
