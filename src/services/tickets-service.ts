@@ -58,7 +58,11 @@ async function postTicketSerive(ticketTypeId: number,userId: number) {
   // } catch(error){
   //   console.error(`Erro ao obter ingressos: ${error.message}`);
   //   throw error; 
-  // }
+
+ // }
+
+
+//  oioi
   
 }
 
